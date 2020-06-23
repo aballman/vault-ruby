@@ -3,7 +3,7 @@ require "spec_helper"
 module Vault
   describe Authenticate do
     let(:client) { double('client') }
-    let(:auth) { Authenticate.new(client: client) }
+    let(:auth) { Authenticate.new(client) }
 
     describe '#kubernetes' do
       before do
@@ -13,8 +13,12 @@ module Vault
       end
 
       it 'authenticates with Kubernetes Auth method' do
-        expect(client).to receive(:post).with('/v1/auth/kubernetes/login', '{"blah": "wrong"}')
-        expect(auth.kubernetes('test-role')).to eq('secret')
+        expect(client).to receive(:post).with('/v1/auth/kubernetes/login', '{"role":"test-role","jwt":"abc123"}')
+                        .and_return({"auth":{"client_token":"secret"}})
+
+        expect(client).to receive(:token=)
+
+        expect(auth.kubernetes('test-role').auth.client_token).to eq('secret')
       end
     end
 

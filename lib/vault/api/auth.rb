@@ -273,13 +273,15 @@ module Vault
     #   #=> #<Vault::Secret lease_id="">
     #
     # @param [String] role
+    # @param [String] mount optional
     # @param [String] service_account_path optional
     #   Path on filesystem of service account token secret.
-    # @param [String] route optional
     #
     # @return [Secret]
-    def kubernetes(role, service_account_path = nil, route = nil)
-      route ||= '/v1/auth/kubernetes/login'
+    def kubernetes(role, mount = nil, service_account_path = nil)
+      mount ||= 'kubernetes'
+      route = "/v1/auth/#{mount}/login"
+
       service_account_path ||=
         '/var/run/secrets/kubernetes.io/serviceaccount/token'
 
